@@ -197,10 +197,6 @@ public class PomdpPolicyEvaluator {
         return actionNumber;
     }
     
-    
-    
-   
-
     /**
      * @param args the command line arguments
      */
@@ -209,9 +205,4 @@ public class PomdpPolicyEvaluator {
         String policyFile_exercise  = args[1];
         new PomdpPolicyEvaluator(policyFile_nutrition, policyFile_exercise);
     }
-
-    
-    
-    
-    
 }
