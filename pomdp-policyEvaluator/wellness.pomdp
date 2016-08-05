@@ -1,0 +1,54 @@
+discount : 0
+values : reward
+states : low_motivated med_motivated high_motivated
+actions : low_intensity med_intensity high_intensity
+observations: low_motivated med_motivated high_motivated
+
+
+T: *
+0.6 0.2 0.2
+0.2 0.6 0.2
+0.2 0.2 0.6
+
+O : *
+0.70 0.15 0.15
+0.15 0.70 0.15
+0.15 0.15 0.70
+
+R : low_intensity :  low_motivated : * : low_motivated 100
+R : low_intensity :  low_motivated : * : med_motivated 5
+R : low_intensity :  low_motivated : * : high_motivated 10
+
+R : med_intensity :  low_motivated : * : low_motivated 0
+R : med_intensity :  low_motivated : * : med_motivated 0
+R : med_intensity :  low_motivated : * : high_motivated 0
+
+R : high_intensity : low_motivated : * : low_motivated  0
+R : high_intensity : low_motivated : * : med_motivated  0
+R : high_intensity : low_motivated : * : high_motivated 0
+
+
+R : low_intensity :  med_motivated : * : low_motivated 0
+R : low_intensity :  med_motivated : * : med_motivated 5
+R : low_intensity :  med_motivated : * : high_motivated 10
+
+R : med_intensity :  med_motivated : * : low_motivated 0
+R : med_intensity :  med_motivated : * : med_motivated 100
+R : med_intensity :  med_motivated : * : high_motivated 10
+
+
+R: high_intensity  : med_motivated : * : low_motivated 0
+R: high_intensity  : med_motivated : * : med_motivated 0
+R : high_intensity : med_motivated : * : high_motivated 0
+
+R : low_intensity :  high_motivated :* :  low_motivated 0
+R : low_intensity :  high_motivated :* :  med_motivated 5 
+R : low_intensity :  high_motivated :* :  high_motivated 10
+
+R : med_intensity :  high_motivated :* :  low_motivated 0
+R : med_intensity :  high_motivated :* :  med_motivated 5
+R : med_intensity :  high_motivated :* :  high_motivated 10
+
+R : high_intensity : high_motivated : * : low_motivated 0
+R : high_intensity : high_motivated : * : med_motivated 5
+R : high_intensity : high_motivated : * : high_motivated 100
