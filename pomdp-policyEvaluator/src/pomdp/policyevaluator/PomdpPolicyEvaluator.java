@@ -84,23 +84,23 @@ public class PomdpPolicyEvaluator {
         nutritionParams.addTransitionProbability(3, 2, new double[] {0.0,0.0,0.2,0.4,0.4} );
         nutritionParams.addTransitionProbability(4, 2, new double[] {0.0,0.0,0.0,0.2,0.8} );
         
-        exerciseParams.addTransitionProbability(0, 0, new double[] {0.4,0.6,0.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(1, 0, new double[] {0.2,0.6,0.2,0.0,0.0} );
+        exerciseParams.addTransitionProbability(0, 0, new double[] {0.5,0.5,0.0,0.0,0.0} );
+        exerciseParams.addTransitionProbability(1, 0, new double[] {0.25,0.5,0.25,0.0,0.0} );
         exerciseParams.addTransitionProbability(2, 0, new double[] {0.0,0.0,1.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(3, 0, new double[] {0.0,0.0,1.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(4, 0, new double[] {0.0,0.0,1.0,0.0,0.0} );
+        exerciseParams.addTransitionProbability(3, 0, new double[] {0.0,0.0,0.0,1.0,0.0} );
+        exerciseParams.addTransitionProbability(4, 0, new double[] {0.0,0.0,0.0,0.0,1.0} );
         
         exerciseParams.addTransitionProbability(0, 1, new double[] {1.0,0.0,0.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(1, 1, new double[] {0.0,0.6,0.4,0.0,0.0} );
-        exerciseParams.addTransitionProbability(2, 1, new double[] {0.0,0.2,0.2,0.6,0.0} );
-        exerciseParams.addTransitionProbability(3, 1, new double[] {0.0,0.0,0.0,1.0,0.0} );
-        exerciseParams.addTransitionProbability(4, 1, new double[] {0.0,0.0,0.0,1.0,0.0} );
+        exerciseParams.addTransitionProbability(1, 1, new double[] {0.0,0.5,0.5,0.0,0.0} );
+        exerciseParams.addTransitionProbability(2, 1, new double[] {0.0,0.2,0.4,0.4,0.0} );
+        exerciseParams.addTransitionProbability(3, 1, new double[] {0.0,0.0,0.2,0.2,0.6} );
+        exerciseParams.addTransitionProbability(4, 1, new double[] {0.0,0.0,0.0,0.1,0.9} );
        
         exerciseParams.addTransitionProbability(0, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
         exerciseParams.addTransitionProbability(1, 2, new double[] {0.0,1.0,0.0,0.0,0.0} );
         exerciseParams.addTransitionProbability(2, 2, new double[] {0.0,0.0,1.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(3, 2, new double[] {0.0,0.0,0.0,0.8,0.2} );
-        exerciseParams.addTransitionProbability(4, 2, new double[] {0.0,0.0,0.0,0.0,1.0} );
+        exerciseParams.addTransitionProbability(3, 2, new double[] {0.0,0.0,0.2,0.4,0.4} );
+        exerciseParams.addTransitionProbability(4, 2, new double[] {0.0,0.0,0.0,0.2,0.8} );
         
         nutritionParams.addObservationProbability(0,0,new double[] {0.1,0.9} );
         nutritionParams.addObservationProbability(1,0,new double[] {0.8,0.2} );
@@ -120,23 +120,23 @@ public class PomdpPolicyEvaluator {
         nutritionParams.addObservationProbability(3,2,new double[] {0.6,0.4} );
         nutritionParams.addObservationProbability(4,2,new double[] {0.8,0.2} );
         
-        exerciseParams.addObservationProbability(0,0,new double[] {0.7,0.3} );
+        exerciseParams.addObservationProbability(0,0,new double[] {0.1,0.9} );
         exerciseParams.addObservationProbability(1,0,new double[] {0.8,0.2} );
-        exerciseParams.addObservationProbability(2,0,new double[] {0.7,0.3} );
-        exerciseParams.addObservationProbability(3,0,new double[] {0.8,0.2} );
+        exerciseParams.addObservationProbability(2,0,new double[] {1.0,0.0} );
+        exerciseParams.addObservationProbability(3,0,new double[] {1.0,0.0} );
         exerciseParams.addObservationProbability(4,0,new double[] {1.0,0.0} );
         
-        exerciseParams.addObservationProbability(0,1,new double[] {0.2,0.8} );
-        exerciseParams.addObservationProbability(1,1,new double[] {0.2,0.8} );
+        exerciseParams.addObservationProbability(0,1,new double[] {0.1,0.9} );
+        exerciseParams.addObservationProbability(1,1,new double[] {0.3,0.7} );
         exerciseParams.addObservationProbability(2,1,new double[] {0.5,0.5} );
-        exerciseParams.addObservationProbability(3,1,new double[] {0.6,0.4} );
-        exerciseParams.addObservationProbability(4,1,new double[] {0.7,0.3} );
+        exerciseParams.addObservationProbability(3,1,new double[] {1.0,0.0} );
+        exerciseParams.addObservationProbability(4,1,new double[] {1.0,0.0} );
         
         exerciseParams.addObservationProbability(0,2,new double[] {0.0,1.0} );
         exerciseParams.addObservationProbability(1,2,new double[] {0.0,1.0} );
         exerciseParams.addObservationProbability(2,2,new double[] {0.0,1.0} );
-        exerciseParams.addObservationProbability(3,2,new double[] {0.5,0.5} );
-        exerciseParams.addObservationProbability(4,2,new double[] {1.0,0.0} );
+        exerciseParams.addObservationProbability(3,2,new double[] {0.6,0.4} );
+        exerciseParams.addObservationProbability(4,2,new double[] {0.8,0.2} );
         
         
         distributionWindow = new DistributionWindow(nutritionParams.getBeliefDistribution(),

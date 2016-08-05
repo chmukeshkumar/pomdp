@@ -1,54 +1,87 @@
-discount : 0
+discount: 0.20
 values : reward
-states : low_motivated med_motivated high_motivated
+states : precontemplation contemplation preparation action maintenance
 actions : low_intensity med_intensity high_intensity
-observations: low_motivated med_motivated high_motivated
+observations: followed notfollowed
+start : 1.0 0.0 0.0 0.0 0.0 
+
+T : low_intensity
+0.5 0.5 0.0 0.0 0.0
+0.25 0.5 0.25 0.0 0.0 
+0.0 0.0 1.0 0.0 0.0 
+0.0 0.0 0.0 1.0 0.0
+0.0 0.0 0.0 0.0 1.0
+
+T : med_intensity
+1.0 0.0 0.0 0.0 0.0
+0.0 0.5 0.5 0.0 0.0
+0.0 0.2 0.4 0.4 0.0
+0.0 0.0 0.2 0.2 0.6 
+0.0 0.0 0.0 0.1 0.9
+
+T:high_intensity
+1.0 0.0 0.0 0.0 0.0
+0.0 1.0 0.0 0.0 0.0
+0.0 0.0 1.0 0.0 0.0
+0.0 0.0 0.2 0.4 0.4
+0.0 0.0 0.0 0.2 0.8
+
+O: low_intensity
+0.1 0.9
+0.8 0.2
+1.0 0.0
+1.0 0.0
+1.0 0.0
+
+O: med_intensity 
+0.1 0.9
+0.3 0.7
+0.5 0.5
+1.0 0.0
+1.0 0.0
+
+O: high_intensity 
+0 1.0
+0 1.0
+0 1.0
+0.6 0.4
+0.8 0.2
+
+R: low_intensity : * : precontemplation : followed 10
+R: low_intensity : * : precontemplation : notfollowed 5
+R: med_intensity : * : precontemplation : followed 1
+R: med_intensity : * : precontemplation : followed -5
+R: high_intensity : * : precontemplation : followed 1
+R: high_intensity : * : precontemplation : followed -10
+
+R: low_intensity :  * : contemplation : followed 5
+R: low_intensity :  * : contemplation : notfollowed 0
+R: med_intensity :  * : contemplation : followed 2
+R: med_intensity :  * : contemplation : notfollowed -5
+R: high_intensity:  * : contemplation : followed 1
+R: high_intensity:  * : contemplation : followed -10
+
+R: low_intensity : * : preparation : followed 1
+R: low_intensity : * : preparation : notfollowed -5
+R: med_intensity : * : preparation : followed 5
+R: med_intensity : * : preparation : notfollowed -5
+R: high_intensity: * : preparation : followed 1
+R: high_intensity: * : preparation : notfollowed -5
 
 
-T: *
-0.6 0.2 0.2
-0.2 0.6 0.2
-0.2 0.2 0.6
-
-O : *
-0.70 0.15 0.15
-0.15 0.70 0.15
-0.15 0.15 0.70
-
-R : low_intensity :  low_motivated : * : low_motivated 100
-R : low_intensity :  low_motivated : * : med_motivated 5
-R : low_intensity :  low_motivated : * : high_motivated 10
-
-R : med_intensity :  low_motivated : * : low_motivated 0
-R : med_intensity :  low_motivated : * : med_motivated 0
-R : med_intensity :  low_motivated : * : high_motivated 0
-
-R : high_intensity : low_motivated : * : low_motivated  0
-R : high_intensity : low_motivated : * : med_motivated  0
-R : high_intensity : low_motivated : * : high_motivated 0
+R: low_intensity : * : action: followed 1
+R: low_intensity : * : action: notfollowed -5
+R: med_intensity : * : action : followed 10
+R: med_intensity : * : action : notfollowed 5
+R: high_intensity: * : action : followed 5
+R: high_intensity :*   : action : notfollowed 0
 
 
-R : low_intensity :  med_motivated : * : low_motivated 0
-R : low_intensity :  med_motivated : * : med_motivated 5
-R : low_intensity :  med_motivated : * : high_motivated 10
+R: low_intensity : * : maintenance : followed 1
+R: low_intensity : * : maintenance : followed -5
+R: med_intensity : * : maintenance : followed 5
+R: med_intensity : * : maintenance : notfollowed -5
+R: high_intensity: * : maintenance : followed 10
+R: high_intensity: * : maintenance : notfollowed 5
 
-R : med_intensity :  med_motivated : * : low_motivated 0
-R : med_intensity :  med_motivated : * : med_motivated 100
-R : med_intensity :  med_motivated : * : high_motivated 10
 
-
-R: high_intensity  : med_motivated : * : low_motivated 0
-R: high_intensity  : med_motivated : * : med_motivated 0
-R : high_intensity : med_motivated : * : high_motivated 0
-
-R : low_intensity :  high_motivated :* :  low_motivated 0
-R : low_intensity :  high_motivated :* :  med_motivated 5 
-R : low_intensity :  high_motivated :* :  high_motivated 10
-
-R : med_intensity :  high_motivated :* :  low_motivated 0
-R : med_intensity :  high_motivated :* :  med_motivated 5
-R : med_intensity :  high_motivated :* :  high_motivated 10
-
-R : high_intensity : high_motivated : * : low_motivated 0
-R : high_intensity : high_motivated : * : med_motivated 5
-R : high_intensity : high_motivated : * : high_motivated 100
