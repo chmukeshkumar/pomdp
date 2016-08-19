@@ -1,0 +1,54 @@
+discount: 0.20
+values : reward
+states : precontemplation contemplation preparation action maintenance
+actions : low_intensity med_intensity high_intensity
+observations: followed notfollowed
+start : 0.2 0.2 0.2 0.2 0.2 
+
+T : low_intensity
+0.75 0.25 0.0 0.0 0.0
+0.25 0.5 0.25 0.0 0.0 
+0.0 0.1 0.8 0.1 0.0 
+0.0 0.0 0.1 0.8 0.1
+0.0 0.0 0.0 0.1 0.9
+
+T : med_intensity
+0.9 0.1 0.0 0.0 0.0
+0.3 0.4 0.3 0.0 0.0
+0.0 0.1 0.4 0.5 0.0
+0.0 0.0 0.1 0.3 0.6 
+0.0 0.0 0.1 0.4 0.5
+
+T:high_intensity
+1.0 0.0 0.0 0.0 0.0
+1.0 0.0 0.0 0.0 0.0
+1.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.2 0.4 0.4
+0.0 0.0 0.0 0.2 0.8
+
+O: low_intensity
+0.1 0.9
+0.8 0.2
+1.0 0.0
+1.0 0.0
+1.0 0.0
+
+O: med_intensity 
+0.1 0.9
+0.3 0.7
+0.5 0.5
+1.0 0.0
+1.0 0.0
+
+O: high_intensity 
+0 1.0
+0 1.0
+0 1.0
+0.6 0.4
+0.8 0.2
+
+R: low_intensity:precontemplation:*:followed  10
+R: low_intensity:contemplation:*:followed  15
+R: med_intensity:preparation:*:followed  20
+R: med_intensity:action:*:followed  25
+R: high_intensity:maintenance:*:followed  30

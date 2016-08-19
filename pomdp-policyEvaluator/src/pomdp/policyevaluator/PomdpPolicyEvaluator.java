@@ -10,10 +10,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
-import javax.swing.JFrame;
-import mdpwellness.BodyParams;
+import mdpwellness.KevinHallModel;
+import mdpwellness.UserInfo;
 import mdpwellness.MDPWellness;
+import mdpwellness.WellnessAction;
+import org.apache.commons.math3.exception.MaxCountExceededException;
+import org.apache.commons.math3.ode.FirstOrderIntegrator;
+import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
+import org.apache.commons.math3.ode.sampling.StepHandler;
+import org.apache.commons.math3.ode.sampling.StepInterpolator;
 
 /**
  *
@@ -28,7 +35,15 @@ public class PomdpPolicyEvaluator {
     private PomdpParams nutritionParams = new PomdpParams(5,3,2);
     private PomdpParams exerciseParams  = new PomdpParams(5,3,2);
     
-    DistributionWindow distributionWindow;
+    DistributionWindow nutritionDistributionWindow;
+    DistributionWindow exerciseDistributionWindow;
+    
+    private Random generator = new Random();
+    
+    double calorieVariance[] = {1000,750,500,250,100};
+//    double calorieVariance[] = {0,0,0,0,0};
+    
+    ArrayList<Double> weightTrajectory = new ArrayList();
     
     PomdpPolicyEvaluator(String policyFileNutrition, String policyFileExercise) throws FileNotFoundException, IOException {
         BufferedReader reader = new BufferedReader(new FileReader(policyFileNutrition));
@@ -66,39 +81,39 @@ public class PomdpPolicyEvaluator {
         nutritionParams.setInitialDistribution(new double[]{0.2,0.2,0.2,0.2,0.2});
         exerciseParams.setInitialDistribution(new double[]{0.2,0.2,0.2,0.2,0.2});
         
-        nutritionParams.addTransitionProbability(0, 0, new double[] {0.5,0.5,0.0,0.0,0.0} );
+        nutritionParams.addTransitionProbability(0, 0, new double[] {0.75,0.25,0.0,0.0,0.0} );
         nutritionParams.addTransitionProbability(1, 0, new double[] {0.25,0.5,0.25,0.0,0.0} );
-        nutritionParams.addTransitionProbability(2, 0, new double[] {0.0,0.0,1.0,0.0,0.0} );
-        nutritionParams.addTransitionProbability(3, 0, new double[] {0.0,0.0,0.0,1.0,0.0} );
-        nutritionParams.addTransitionProbability(4, 0, new double[] {0.0,0.0,0.0,0.0,1.0} );
+        nutritionParams.addTransitionProbability(2, 0, new double[] {0.0,0.1,0.8,0.1,0.0} );
+        nutritionParams.addTransitionProbability(3, 0, new double[] {0.0,0.0,0.1,0.8,0.1} );
+        nutritionParams.addTransitionProbability(4, 0, new double[] {0.0,0.0,0.0,0.1,0.9} );
         
-        nutritionParams.addTransitionProbability(0, 1, new double[] {1.0,0.0,0.0,0.0,0.0} );
-        nutritionParams.addTransitionProbability(1, 1, new double[] {0.0,0.5,0.5,0.0,0.0} );
-        nutritionParams.addTransitionProbability(2, 1, new double[] {0.0,0.2,0.4,0.4,0.0} );
-        nutritionParams.addTransitionProbability(3, 1, new double[] {0.0,0.0,0.2,0.2,0.6} );
-        nutritionParams.addTransitionProbability(4, 1, new double[] {0.0,0.0,0.0,0.1,0.9} );
+        nutritionParams.addTransitionProbability(0, 1, new double[] {0.9,0.1,0.0,0.0,0.0} );
+        nutritionParams.addTransitionProbability(1, 1, new double[] {0.3,0.4,0.3,0.0,0.0} );
+        nutritionParams.addTransitionProbability(2, 1, new double[] {0.0,0.1,0.4,0.5,0.0} );
+        nutritionParams.addTransitionProbability(3, 1, new double[] {0.0,0.0,0.1,0.3,0.6} );
+        nutritionParams.addTransitionProbability(4, 1, new double[] {0.0,0.0,0.1,0.4,0.5} );
         
         nutritionParams.addTransitionProbability(0, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
-        nutritionParams.addTransitionProbability(1, 2, new double[] {0.0,1.0,0.0,0.0,0.0} );
-        nutritionParams.addTransitionProbability(2, 2, new double[] {0.0,0.0,1.0,0.0,0.0} );
+        nutritionParams.addTransitionProbability(1, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
+        nutritionParams.addTransitionProbability(2, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
         nutritionParams.addTransitionProbability(3, 2, new double[] {0.0,0.0,0.2,0.4,0.4} );
         nutritionParams.addTransitionProbability(4, 2, new double[] {0.0,0.0,0.0,0.2,0.8} );
         
-        exerciseParams.addTransitionProbability(0, 0, new double[] {0.5,0.5,0.0,0.0,0.0} );
+        exerciseParams.addTransitionProbability(0, 0, new double[] {0.75,0.25,0.0,0.0,0.0} );
         exerciseParams.addTransitionProbability(1, 0, new double[] {0.25,0.5,0.25,0.0,0.0} );
-        exerciseParams.addTransitionProbability(2, 0, new double[] {0.0,0.0,1.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(3, 0, new double[] {0.0,0.0,0.0,1.0,0.0} );
-        exerciseParams.addTransitionProbability(4, 0, new double[] {0.0,0.0,0.0,0.0,1.0} );
+        exerciseParams.addTransitionProbability(2, 0, new double[] {0.0,0.1,0.8,0.1,0.0} );
+        exerciseParams.addTransitionProbability(3, 0, new double[] {0.0,0.0,0.1,0.8,0.1} );
+        exerciseParams.addTransitionProbability(4, 0, new double[] {0.0,0.0,0.0,0.1,0.9} );
         
-        exerciseParams.addTransitionProbability(0, 1, new double[] {1.0,0.0,0.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(1, 1, new double[] {0.0,0.5,0.5,0.0,0.0} );
-        exerciseParams.addTransitionProbability(2, 1, new double[] {0.0,0.2,0.4,0.4,0.0} );
-        exerciseParams.addTransitionProbability(3, 1, new double[] {0.0,0.0,0.2,0.2,0.6} );
-        exerciseParams.addTransitionProbability(4, 1, new double[] {0.0,0.0,0.0,0.1,0.9} );
+        exerciseParams.addTransitionProbability(0, 1, new double[] {0.9,0.1,0.0,0.0,0.0} );
+        exerciseParams.addTransitionProbability(1, 1, new double[] {0.3,0.4,0.3,0.0,0.0} );
+        exerciseParams.addTransitionProbability(2, 1, new double[] {0.0,0.1,0.4,0.5,0.0} );
+        exerciseParams.addTransitionProbability(3, 1, new double[] {0.0,0.0,0.1,0.3,0.6} );
+        exerciseParams.addTransitionProbability(4, 1, new double[] {0.0,0.0,0.1,0.8,0.1} );
        
         exerciseParams.addTransitionProbability(0, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(1, 2, new double[] {0.0,1.0,0.0,0.0,0.0} );
-        exerciseParams.addTransitionProbability(2, 2, new double[] {0.0,0.0,1.0,0.0,0.0} );
+        exerciseParams.addTransitionProbability(1, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
+        exerciseParams.addTransitionProbability(2, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
         exerciseParams.addTransitionProbability(3, 2, new double[] {0.0,0.0,0.2,0.4,0.4} );
         exerciseParams.addTransitionProbability(4, 2, new double[] {0.0,0.0,0.0,0.2,0.8} );
         
@@ -139,34 +154,107 @@ public class PomdpPolicyEvaluator {
         exerciseParams.addObservationProbability(4,2,new double[] {0.8,0.2} );
         
         
-        distributionWindow = new DistributionWindow(nutritionParams.getBeliefDistribution(),
-                                                    exerciseParams.getBeliefDistribution());
+        nutritionDistributionWindow = new DistributionWindow("Nutrition Distribution",nutritionParams.getBeliefDistribution());
+        exerciseDistributionWindow  = new DistributionWindow("Exercise Distribution", exerciseParams.getBeliefDistribution());
         
-        Scanner input = new Scanner(System.in);
-        
-        while(true) {
+        double finalWeight = UserInfo.currentWeight;
+        while(finalWeight > UserInfo.targetWeight) {
             int actionNumber_nutrition = getActionNumber(nutritionParams.getBeliefDistribution(),policyVector_nutrition);
             int actionNumber_exercise = getActionNumber(exerciseParams.getBeliefDistribution(),policyVector_exercise);
             System.out.println("Selected IntensityLevel Nutrition " + actionNumber_nutrition + 
                                " Exercise " + actionNumber_exercise);
             MDPWellness mdpWellness = new MDPWellness(actionNumber_nutrition, actionNumber_exercise);
-            String selectedAction = mdpWellness.getAction((int)BodyParams.initialWeight);
+            String selectedAction = mdpWellness.getAction((int)UserInfo.currentWeight);
             actionWindow.setActionSelected(selectedAction);
-            System.out.println("selected action " + selectedAction);
-            System.out.println("Enter Actual Nutrition Intensity Level ( 0-2) ");
-            int observationNumber_nutrition = input.nextInt();
-            System.out.println("Enter Actual Exercise Intensity Level ( 0-2) ");
-            int observationNumber_exercise = input.nextInt();
+            System.out.println(selectedAction);
             
+            double nutritionCalories = Double.valueOf(selectedAction.split("-")[0]);
+            double exerciseCalories  = Double.valueOf(selectedAction.split("-")[1]);
+            
+            
+            int[] performanceEvaluation = getPerformance();
+            
+            int observationNumber_nutrition = performanceEvaluation[0];
+            int observationNumber_exercise = performanceEvaluation[1];
             
             nutritionParams.updateDistribution(actionNumber_nutrition, observationNumber_nutrition);
             exerciseParams.updateDistribution(actionNumber_exercise, observationNumber_exercise);
             
-            printBeliefDistribution();
+            finalWeight = executeAction(nutritionCalories,nutritionParams.beliefDistribution,calorieVariance,exerciseCalories, exerciseParams.beliefDistribution, calorieVariance );
+            System.out.println("Final Weight " + finalWeight);
+            UserInfo.currentWeight = finalWeight;
+            UserInfo.age += WellnessAction.timeStep/365.0;
             
-            distributionWindow.update(nutritionParams.getBeliefDistribution(),
-                    exerciseParams.getBeliefDistribution());
+            printBeliefDistribution();
+             
+            nutritionDistributionWindow.update(nutritionParams.getBeliefDistribution());
+//            exerciseDistributionWindow.update(exerciseParams.getBeliefDistribution());
         }
+        System.out.println("Reached Target Weight");
+        for(double d: weightTrajectory) {
+            System.out.println(d);
+        }
+    }
+    
+    
+    double executeAction(double nutritionCalories, double[] nutritionBelief, double[] nutritionVariance, 
+                        double exerciseCalories,   double[] exerciseBelief,  double[] exerciseVariance) 
+    {
+        KevinHallModel model = new KevinHallModel(nutritionCalories, nutritionBelief, nutritionVariance,
+                                                  exerciseCalories, exerciseBelief, exerciseVariance) ;
+        
+        StepHandler stepHandler = new StepHandler(){ 
+
+            @Override
+            public void init(double d, double[] doubles, double d1) {
+                
+            }
+
+            @Override
+            public void handleStep(StepInterpolator si, boolean bln) throws MaxCountExceededException {
+                double t = si.getCurrentTime();
+                double[] yy = si.getInterpolatedState();
+                double weight = yy[0]+yy[1]+yy[2]+yy[3] ;
+                weightTrajectory.add(weight);
+            }
+            
+        };
+        double[] y = new double[]{0.5,model.getInitialECF(),model.getInitialFatMass(),model.getInitialLeanMass(),0};
+        FirstOrderIntegrator integrator = new ClassicalRungeKuttaIntegrator(0.1);
+        integrator.addStepHandler(stepHandler);
+        integrator.integrate(model, 0, y, (WellnessAction.timeStep-1), y);
+        double weight = y[0]+y[1]+y[2]+y[3] ;
+        return weight;
+    }
+    
+    int[] getPerformance() {
+        int performance[] = new int[2];
+//         double desireToPerform_nutrition = 0.8;
+//        double desireToPerform_exercise  = 0.8;
+//        
+//        double random = generator.nextDouble();
+//        if(random < desireToPerform_nutrition ) {
+//            performance[0] = 0;
+//        }
+//        else {
+//            performance[0] = 1;
+//        }
+//        random = generator.nextDouble();
+//        if(random < desireToPerform_exercise ) {
+//            performance[1] = 0;
+//        }
+//        else {
+//            performance[1] = 1;
+//        }
+//        
+//        System.out.println("Observation Nutrition:" + performance[0] + " Exercise "+performance[1]);
+        Scanner in = new Scanner(System.in);
+       
+        performance[0] = in.nextInt();
+        performance[1] = in.nextInt();
+       
+        
+        return performance;
     }
     
     void printBeliefDistribution() {
