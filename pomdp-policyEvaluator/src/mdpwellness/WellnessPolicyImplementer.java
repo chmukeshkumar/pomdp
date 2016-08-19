@@ -58,7 +58,7 @@ public class WellnessPolicyImplementer {
         for(int trial =0;trial<1;trial++)
         {
             System.out.println("-------------------Implementing Policy--------------- ");
-            double weight = BodyParams.initialWeight;
+            double weight = UserInfo.currentWeight;
             int time = 0;
 
             XYSeries newSeries = new XYSeries(trial);
@@ -74,11 +74,11 @@ public class WellnessPolicyImplementer {
                 double actionCalories = Double.valueOf(action.split("-")[0]);
                 double actionPA = Double.valueOf(action.split("-")[1]);       
 
-                KevinHallModel khm = new KevinHallModel(weight,
-                                                        BodyParams.height,
-                                                        BodyParams.age,
-                                                        BodyParams.gender,
-                                                        BodyParams.initialPA);
+                KevinHallModelOLD khm = new KevinHallModelOLD(weight,
+                                                        UserInfo.height,
+                                                        UserInfo.age,
+                                                        UserInfo.gender,
+                                                        UserInfo.pal_init);
 
                 ArrayList<Double> setCalories = new ArrayList();
                 ArrayList<Double> setPA       = new ArrayList();
@@ -99,7 +99,7 @@ public class WellnessPolicyImplementer {
 //                System.out.println("time " + time + " weight " + weight);
                 newSeries.add(time,weight);
 
-            }while (weight > BodyParams.targetWeight );
+            }while (weight > UserInfo.targetWeight );
         
             viz.addSeries(newSeries);
         }

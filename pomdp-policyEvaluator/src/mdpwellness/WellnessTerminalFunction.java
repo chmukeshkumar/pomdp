@@ -23,7 +23,7 @@ public class WellnessTerminalFunction implements TerminalFunction {
     public boolean isTerminal(State s) {
         int weight = s.getFirstObjectOfClass(SUBJECT).getIntValForAttribute(WEIGHT);
 //        System.out.print("\n checking terminal state for " + weight );
-        if(weight <= BodyParams.targetWeight)
+        if(weight <= UserInfo.targetWeight)
         {
 //            System.out.println(":TRUE");
             return true;

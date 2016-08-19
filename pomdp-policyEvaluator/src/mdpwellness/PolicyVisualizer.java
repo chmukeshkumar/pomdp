@@ -57,7 +57,7 @@ public class PolicyVisualizer extends ApplicationFrame{
 	{
             DefaultCategoryDataset defaultcategorydataset = new DefaultCategoryDataset();
             
-            for(int weight = (int)BodyParams.initialWeight ; weight > (int) BodyParams.targetWeight; weight -- )
+            for(int weight = (int)UserInfo.currentWeight ; weight > (int) UserInfo.targetWeight; weight -- )
             {
                 String actionName = policy.get(weight);
                 if(actionName == null)

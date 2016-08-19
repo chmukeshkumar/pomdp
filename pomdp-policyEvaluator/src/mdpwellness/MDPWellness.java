@@ -34,7 +34,11 @@ public class MDPWellness {
     {
         WellnessDomain wellnessDomain = new WellnessDomain();
         Domain domain = wellnessDomain.generateDomain();
-        ActionSet      actionSet = new ActionSet(nutritionMotivationLevel, exerciseMotivationLevel , domain);
+        
+        StateSpace stateSpace = new StateSpace();
+        stateSpace.generateStateSpace((int)UserInfo.targetWeight,(int) UserInfo.currentWeight, domain);
+        
+        ActionSet      actionSet = new ActionSet(nutritionMotivationLevel, exerciseMotivationLevel , domain, stateSpace);
         actionSet.createDefaultActionSet();
         
         WellnessRewardFunction rf = new WellnessRewardFunction();
@@ -43,7 +47,7 @@ public class MDPWellness {
         
         State initialState = getInitialState(domain);
         
-        vi = new ValueIteration(domain,rf,tf,0.5,hashingFactory,0.001,100);
+        vi = new ValueIteration(domain,rf,tf,0.5,hashingFactory,0.01,100);
         vi.planFromState(initialState);
         
         
@@ -82,7 +86,7 @@ public class MDPWellness {
     {
         State s = new State();
         ObjectInstance subject = new ObjectInstance(domain.getObjectClass(SUBJECT),SUBJECT);
-        subject.setValue(WEIGHT, (int) BodyParams.initialWeight);
+        subject.setValue(WEIGHT, (int) UserInfo.currentWeight);
         s.addObject(subject);
         
         return s;

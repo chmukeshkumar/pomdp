@@ -25,26 +25,28 @@ public class WellnessAction extends Action
 {    
     double calories;
     double pa;
-    static double uncertainty[] = {1.0,0,0};
+    StateSpace stateSpace;
+    static double uncertainty[] = {0.8,0.1,0.1};
     Random r = new Random();
     
-    static int timeStep = 21; // days
+    public static int timeStep = 21; // days
     
-    WellnessAction(String name,double calories, double pa, Domain domain)
+    WellnessAction(String name,double calories, double pa, Domain domain,StateSpace stateSpace)
     {
         super(name,domain,"");
         this.calories = calories;
         this.pa       = pa;
+        this.stateSpace = stateSpace;
     }
     
     
     private double performAction(double currentWeight)
     {
-        KevinHallModel khm = new KevinHallModel(currentWeight,
-                                                BodyParams.height,
-                                                BodyParams.age,
-                                                BodyParams.gender,
-                                                BodyParams.initialPA);
+        KevinHallModelOLD khm = new KevinHallModelOLD(currentWeight,
+                                                UserInfo.height,
+                                                UserInfo.age,
+                                                UserInfo.gender,
+                                                UserInfo.pal_init);
         
         double actionCalories;
         double actionPA;       
@@ -59,7 +61,7 @@ public class WellnessAction extends Action
         
         if(this.pa == 0 )
         {
-            actionPA = BodyParams.initialPA;
+            actionPA = UserInfo.pal_init;
         }
         else
         {
@@ -129,34 +131,34 @@ public class WellnessAction extends Action
 //            return result;
 //        }
         
-        if(currentWeight >= BodyParams.targetWeight && currentWeight <= BodyParams.initialWeight)
+        if(currentWeight >= UserInfo.targetWeight && currentWeight <= UserInfo.currentWeight)
         {
-//            System.out.println(" Adding new state at " + currentWeight + " for Action " + this.calories + " " + this.pa + " currentWeight: " +
-//            currentWeight + " final Weight " + finalWeight);
-            State newState1 = s.copy();
-            newState1.getFirstObjectOfClass(SUBJECT).setValue(WEIGHT, finalWeight);
+//             System.out.println(" Adding new state at " + currentWeight + " for Action " + this.calories + " " + this.pa + " for " + finalWeight);
+            State newState1 = getOrCreateState(finalWeight);
             result.add(new TransitionProbability(newState1, uncertainty[0]));
             
             if(uncertainty[1] != 0)
             {
 //                System.out.println(" Adding new state at " + currentWeight + " for Action " + this.calories + " " + this.pa + " for " + (finalWeight - 2));
-                State newState2 = s.copy();
-                newState2.getFirstObjectOfClass(SUBJECT).setValue(WEIGHT, finalWeight - 2);
+                State newState2 = getOrCreateState(finalWeight - 2);
                 result.add(new TransitionProbability(newState2, uncertainty[1]));
             }
             
             if(uncertainty[2] != 0)
             {
 //                System.out.println(" Adding new state at " + currentWeight + " for Action " + this.calories + " " + this.pa + " for " + (finalWeight + 2));
-                State newState3 = s.copy();
-                double newWeight = finalWeight + 2;
-    //            if(newWeight > 0 && newWeight <= BodyParams.initialWeight)
-    //            {
-                    newState3.getFirstObjectOfClass(SUBJECT).setValue(WEIGHT, newWeight);
-                    result.add(new TransitionProbability(newState3, uncertainty[2]));
-    //            }
+                State newState3 = getOrCreateState(finalWeight + 2);
+                result.add(new TransitionProbability(newState3, uncertainty[2]));
             }
         }
         return result;
+    }
+    
+    State getOrCreateState(int weight) {
+        State s = stateSpace.getState(weight);
+        if(s == null) {
+            s = stateSpace.addState(weight);
+        }
+        return s;
     }
 }

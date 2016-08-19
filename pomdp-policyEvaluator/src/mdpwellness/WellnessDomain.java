@@ -30,7 +30,7 @@ class WellnessDomain {
         SADomain domain = new SADomain();
         
         Attribute weight = new Attribute(domain,WEIGHT,AttributeType.INT);
-        weight.setLims((int)BodyParams.targetWeight,(int)BodyParams.initialWeight);
+        weight.setLims((int)UserInfo.targetWeight,(int)UserInfo.currentWeight);
         
         ObjectClass subject = new ObjectClass(domain,SUBJECT);
         subject.addAttribute(weight);

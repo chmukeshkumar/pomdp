@@ -8,11 +8,13 @@ package pomdp.policyevaluator;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.CategoryDataset;
@@ -25,18 +27,18 @@ import org.jfree.data.xy.XYSeriesCollection;
  * @author mchippa
  */
 class DistributionWindow  extends JFrame {
-    private DefaultCategoryDataset beliefStates_exercise;
-    private DefaultCategoryDataset beliefStates_nutrition;
+    private DefaultCategoryDataset beliefStates;
     
     
     
-    DistributionWindow(double[] nutritionDistribution, double[] exerciseDistribution) {
-        ChartPanel nutritionPanel = getNutritionChartPanel();
-        ChartPanel exercisePanel  = getExerciseChartPanel();
+    
+    DistributionWindow(String title, double[] nutritionDistribution) {
+        ChartPanel Panel = getNutritionChartPanel(title);
+        
         
         this.setLayout(new BorderLayout());
-        this.add(nutritionPanel,BorderLayout.NORTH);
-        this.add(exercisePanel, BorderLayout.SOUTH);
+        this.add(Panel,BorderLayout.CENTER);
+        
         
         this.setPreferredSize(new Dimension(1000, 750));
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -44,33 +46,33 @@ class DistributionWindow  extends JFrame {
         
         this.setVisible(true);
         
-        update(nutritionDistribution, exerciseDistribution);
+        update(nutritionDistribution);
     }
     
-    private ChartPanel getExerciseChartPanel() {
-        beliefStates_exercise = new DefaultCategoryDataset();
-        JFreeChart chart = ChartFactory.createBarChart( "Belief State Distribution","Motivation State","Probability",beliefStates_exercise, PlotOrientation.VERTICAL,true,true,false);
-        ChartPanel chartPanel = new ChartPanel(chart, true, true, true, true, true);
-        chartPanel.setMouseWheelEnabled(true);
-        return chartPanel;
-    }
+   
     
-    private ChartPanel getNutritionChartPanel() {
-        beliefStates_nutrition = new DefaultCategoryDataset();
-        JFreeChart chart = ChartFactory.createBarChart( "Nutrition Belief State Distribution","Motivation State","Probability",beliefStates_nutrition, PlotOrientation.VERTICAL,true,true,false);
-        ChartPanel chartPanel = new ChartPanel(chart, true, true, true, true, true);
-        chartPanel.setMouseWheelEnabled(true);
-        return chartPanel;
-    }
-    
-    public void update(double[] newNutritionDistribution, double[] newExerciseDistribution) {
+    private ChartPanel getNutritionChartPanel(String title) {
+        beliefStates = new DefaultCategoryDataset();
+        JFreeChart chart = ChartFactory.createBarChart( title ,"Motivation Distribution","Probability",beliefStates, PlotOrientation.VERTICAL,true,true,false);
+        chart.removeLegend();
         
-        for(int i=0;i<newNutritionDistribution.length;i++) {
-            beliefStates_nutrition.addValue(newNutritionDistribution[i],"M"+i,"p");
-        }
-        for(int i=0;i<newExerciseDistribution.length;i++) {
-            beliefStates_exercise.addValue(newExerciseDistribution[i],"M"+i,"p");
-        }
+        CategoryPlot xyplot = (CategoryPlot) chart.getCategoryPlot();
+        
+        ChartPanel chartPanel = new ChartPanel(chart, true, true, true, true, true);
+        chartPanel.setMouseWheelEnabled(true);
+        
+        xyplot.getDomainAxis().setLabelFont(new Font("Ariel",Font.BOLD,18));
+        return chartPanel;
+    }
+    
+    public void update(double[] newNutritionDistribution) {
+        
+        beliefStates.addValue(newNutritionDistribution[0],"","Pre-contemplation");
+        beliefStates.addValue(newNutritionDistribution[1],"","Contemplation");
+        beliefStates.addValue(newNutritionDistribution[2],"","Preparation");
+        beliefStates.addValue(newNutritionDistribution[3],"","Action");
+        beliefStates.addValue(newNutritionDistribution[4],"","Maintenance");
+        
     }
     
 }

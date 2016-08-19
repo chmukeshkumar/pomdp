@@ -24,10 +24,13 @@ public class ActionSet {
     int nutritionMotivationLevel;
     int exerciseMotivationLevel;
     
-    ActionSet(int nutritionMotivationLevel, int exerciseMotivationLevel, Domain domain) {
+    private StateSpace stateSpace;
+    
+    ActionSet(int nutritionMotivationLevel, int exerciseMotivationLevel, Domain domain, StateSpace stateSpace) {
         this.nutritionMotivationLevel = nutritionMotivationLevel;
         this.exerciseMotivationLevel  = exerciseMotivationLevel;
         this.domain = domain;
+        this.stateSpace = stateSpace;
     }
     
     public void createDefaultActionSet()
@@ -40,7 +43,7 @@ public class ActionSet {
 //            double pa = BodyParams.initialPA;
             for(double pa = paLimits[0] ; pa <= paLimits[1] ; pa += 0.5 )
             {
-                new WellnessAction((int)calories+"-"+pa,calories, pa,this.domain);
+                new WellnessAction((int)calories+"-"+pa,calories, pa,this.domain, this.stateSpace);
             }
         }
 //        new WellnessAction(minCalories+"-"+minPA,minCalories,minPA,this.domain);

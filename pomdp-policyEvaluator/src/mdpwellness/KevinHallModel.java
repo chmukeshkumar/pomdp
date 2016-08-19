@@ -1,7 +1,13 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package mdpwellness;
 
-
 import java.util.ArrayList;
+import java.util.Random;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
@@ -28,13 +34,21 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
     private final double xi_Na = 3000;
     private final double Xi_Cl = 4000;
     
-
     private double kG;
     private double CI_b;
     private double K;
     
     double baseLineCalories;
-    ArrayList<Double> currentCalories;
+    
+    
+    
+    double nutritionCalories;
+    double[] nutritionDistribution;
+    double[] nutritionVariance;
+    
+    double exercisepal;
+    double[] exerciseDistribution;
+    double[] exerciseVariance;
     
     double ciFraction;
     double deltaNa;
@@ -46,23 +60,36 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
     double age;
     String gender;
     
-    public KevinHallModel(double initialWeight, double height, double age, String gender, double pal_init) {
-        
-        this.initialWeight = initialWeight;
+    Random generator;
+    
+    public KevinHallModel(double nutritionCalories, double[] nutritionDistribution, double[] nutritionVariance, double exerciseCalories, double[] exerciseDistribution, double[] exerciseVariance) 
+    {
+        this.initialWeight = UserInfo.currentWeight;
         this.ciFraction = 0.5;
         this.deltaNa = 0;
-        this.pal_init = pal_init;
+        this.pal_init = UserInfo.pal_init;
         
-        this.height = height;
-        this.age = age;
-        this.gender = gender;
+        this.height = UserInfo.height;
+        this.age = UserInfo.age;
+        this.gender = UserInfo.gender;
         
         baseLineCalories = getRMR(initialWeight) * pal_init;
         CI_b = baseLineCalories * 0.5;
         kG = CI_b/(Math.pow(Ginit,2));
         
+        this.nutritionCalories = nutritionCalories;
+        this.nutritionDistribution = nutritionDistribution;
+        this.nutritionVariance = nutritionVariance;
+        
+        this.exercisepal = exerciseCalories;
+        this.exerciseDistribution = exerciseDistribution;
+        this.exerciseVariance = exerciseVariance;
+        
         updateK();
+        
+        this.generator = new Random();
     }
+    
     
     @Override
     public int getDimension() {
@@ -73,9 +100,10 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
     public void computeDerivatives(double t, double[] y, double[] yDot) throws MaxCountExceededException, DimensionMismatchException {
         double bodyWeight = y[0] + y[1] + y[2] + y[3];
         double rmr = getRMR(bodyWeight);
-        double calories = getCalories(t);
-        double palFinal = getPAL(t);
-        double delta = getDelta(palFinal, rmr, bodyWeight);
+        double calories = getCalories();
+        double delta = getDelta(rmr,bodyWeight);
+        
+        
         double ciIntake = calories*ciFraction;
         double P = getP(y[2]);
         double tef = getTEF(calories);
@@ -88,10 +116,44 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
         yDot[4] = (beta_at*(calories - baseLineCalories) - y[4])/tau_at;
     }
     
-    private double getCalories(double t)
+    private double getCalories()
     {
-        int day = (int)t;
-        return currentCalories.get(day);
+        
+        double randomNutritionCalories = getRandom(nutritionDistribution,nutritionVariance);
+        return nutritionCalories + randomNutritionCalories;
+    }
+    
+    private double getRandom(double[] probDist, double[] var) {
+       
+        int id = getRandomID(probDist);
+        
+        double minValue = 0;
+        double maxValue = var[id];
+        if(id != 0) {
+            minValue = var[id - 1];
+        }
+        
+        double randomValue = minValue + (maxValue - minValue) * generator.nextDouble();
+        
+        return randomValue;
+    }
+    
+    private int getRandomID(double[] probDist) {
+        double random = generator.nextDouble();
+        double[] probDistCum = new double[probDist.length];
+        double sum = 0;
+        for(int i =0;i<probDist.length;i++) {
+            sum = sum + probDist[i];
+            probDistCum[i] = sum;
+        }
+        
+        int id = 0;
+        for(;id<probDistCum.length;id++) {
+            if(random < probDistCum[id]) {
+                break;
+            }
+        }
+        return id;
     }
     
     private double getPAL(double t)
@@ -112,14 +174,14 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
         K = baseLineCalories - (gammaF*fatMass + gammaL*leanMass + delta*initialWeight + tef + at );
     }
     
-    double getInitialLeanMass()
+    public double getInitialLeanMass()
     {
         double fatmass = getInitialFatMass();
         double initECF = getInitialECF();
         return (initialWeight -Ginit - initECF - fatmass);
     }
     
-    double getInitialECF() {
+    public double getInitialECF() {
         double initECF = 0.7*0.235*initialWeight;
         return initECF;
     }
@@ -130,14 +192,14 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
     }
 
     
-    double getInitialFatMass()
+    public double getInitialFatMass()
     {
         double fm = 0;
         if(gender.contains("F"))
         {
             fm = initialWeight/100*((0.14*age) + (39.96*Math.log(initialWeight/(Math.pow(height,2))) - 102.01));
-        }    
-       else
+        }
+        else
         {
             fm = initialWeight/100*((0.14*age) + (37.31*Math.log(initialWeight/(Math.pow(height,2))) - 103.94));
             
@@ -158,8 +220,13 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
         return beta_tef*(calories- baseLineCalories);
     }
     
-    private double getDelta(double pal,double rmr,double BW)
+    private double getDelta(double rmr,double BW)
     {
+        double random = getRandom(exerciseDistribution, exerciseVariance);
+        double pal = exercisepal - random;
+        if(pal < 1.0) {
+            pal = 1.0;
+        }
         double delta = ((1 - beta_tef)*pal - 1)*rmr/BW;
         return delta;
     }
@@ -179,8 +246,18 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
         return rmr;
     }
 
-    void setCurrentParameters(ArrayList<Double> currentCalories, ArrayList<Double> pal_final) {
-        this.currentCalories = currentCalories;
-        this.pal_final = pal_final;
+//    private double getDelta(double initialWeight) {
+//        double r1 = generator.nextDouble();
+//        double randomExerciseCalories = getRandomCalories(r1,exerciseDistribution,exerciseVariance);
+//        double exCal =  exerciseCalories - randomExerciseCalories;
+//        if(exCal < 0 ) {
+//            exCal = 0;
+//        }
+//        return exCal/initialWeight;
+//    }
+
+    private double getDelta(double pal, double rmr, double weight) {
+        double delta = ((1 - beta_tef)*pal - 1)*rmr/weight;
+        return delta;
     }
 }

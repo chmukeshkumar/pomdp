@@ -27,7 +27,7 @@ class ActionWindow extends JFrame {
             double calorieBounds[] = ActionSet.getCalorieBounds(i);
             double paBounds[]      = ActionSet.getPABounds(i);
             for(int calories = (int)calorieBounds[0] ; calories<=calorieBounds[1];calories+=100) {
-                for(double pa = paBounds[0];pa<=paBounds[1];pa+=0.5) {
+                for(double pa = paBounds[0];pa<=paBounds[1];pa+=0.2) {
                     Color buttonColor = getActionIntensityColor(i);
                     MyJButton newButton = new MyJButton(""+calories+"-"+pa,buttonColor);
                     newButton.setOpaque(true);
