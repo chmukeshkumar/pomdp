@@ -10,12 +10,8 @@ import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
  *
  * @author munna
  */
-<<<<<<< HEAD
-public class KevinHallModelOLD implements FirstOrderDifferentialEquations {
-=======
-public class KevinHallModel implements FirstOrderDifferentialEquations{
->>>>>>> 3b7459b6d5dd828ce01978ebd29c6ccae1fe1ea2
-    
+public class KevinHallModelOLD implements FirstOrderDifferentialEquations{
+   
     private double Ginit = 0.5;
     private double row_G = 4200; // kcal/Kg
     private double row_F = 9488.5277192; // kcal/kg
@@ -50,12 +46,7 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
     double age;
     String gender;
     
-<<<<<<< HEAD
     public KevinHallModelOLD(double initialWeight, double height, double age, String gender, double pal_init) {
-=======
-    public KevinHallModel(double initialWeight, double height, double age, String gender, double pal_init) {
->>>>>>> 3b7459b6d5dd828ce01978ebd29c6ccae1fe1ea2
-        
         this.initialWeight = initialWeight;
         this.ciFraction = 0.5;
         this.deltaNa = 0;

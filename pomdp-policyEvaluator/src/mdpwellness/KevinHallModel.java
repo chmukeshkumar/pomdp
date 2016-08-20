@@ -101,6 +101,8 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
         double bodyWeight = y[0] + y[1] + y[2] + y[3];
         double rmr = getRMR(bodyWeight);
         double calories = getCalories();
+        
+        
         double delta = getDelta(rmr,bodyWeight);
         
         
@@ -118,7 +120,6 @@ public class KevinHallModel implements FirstOrderDifferentialEquations{
     
     private double getCalories()
     {
-        
         double randomNutritionCalories = getRandom(nutritionDistribution,nutritionVariance);
         return nutritionCalories + randomNutritionCalories;
     }

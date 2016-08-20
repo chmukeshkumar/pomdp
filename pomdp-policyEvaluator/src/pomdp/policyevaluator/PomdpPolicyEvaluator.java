@@ -6,12 +6,14 @@
 package pomdp.policyevaluator;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Scanner;
 import mdpwellness.KevinHallModel;
 import mdpwellness.UserInfo;
 import mdpwellness.MDPWellness;
@@ -40,8 +42,11 @@ public class PomdpPolicyEvaluator {
     
     private Random generator = new Random();
     
-    double calorieVariance[] = {1000,750,500,250,100};
-//    double calorieVariance[] = {0,0,0,0,0};
+    double nutritionVariance[] = {1000,750,500,250,100};
+    double exerciseVariance[] = {1.0,0.75,0.5,0.25,0.1};
+    
+    double desireToPerform_nutrition = 1.0;
+    double desireToPerform_exercise  = 1.0;
     
     ArrayList<Double> weightTrajectory = new ArrayList();
     
@@ -77,7 +82,7 @@ public class PomdpPolicyEvaluator {
             reader.readLine();
         }
         
-        ActionWindow actionWindow = new ActionWindow(3);
+//        ActionWindow actionWindow = new ActionWindow(3);
         nutritionParams.setInitialDistribution(new double[]{0.2,0.2,0.2,0.2,0.2});
         exerciseParams.setInitialDistribution(new double[]{0.2,0.2,0.2,0.2,0.2});
         
@@ -109,7 +114,7 @@ public class PomdpPolicyEvaluator {
         exerciseParams.addTransitionProbability(1, 1, new double[] {0.3,0.4,0.3,0.0,0.0} );
         exerciseParams.addTransitionProbability(2, 1, new double[] {0.0,0.1,0.4,0.5,0.0} );
         exerciseParams.addTransitionProbability(3, 1, new double[] {0.0,0.0,0.1,0.3,0.6} );
-        exerciseParams.addTransitionProbability(4, 1, new double[] {0.0,0.0,0.1,0.8,0.1} );
+        exerciseParams.addTransitionProbability(4, 1, new double[] {0.0,0.0,0.1,0.4,0.5} );
        
         exerciseParams.addTransitionProbability(0, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
         exerciseParams.addTransitionProbability(1, 2, new double[] {1.0,0.0,0.0,0.0,0.0} );
@@ -154,48 +159,67 @@ public class PomdpPolicyEvaluator {
         exerciseParams.addObservationProbability(4,2,new double[] {0.8,0.2} );
         
         
-        nutritionDistributionWindow = new DistributionWindow("Nutrition Distribution",nutritionParams.getBeliefDistribution());
-        exerciseDistributionWindow  = new DistributionWindow("Exercise Distribution", exerciseParams.getBeliefDistribution());
-        
-        double finalWeight = UserInfo.currentWeight;
-        while(finalWeight > UserInfo.targetWeight) {
-            int actionNumber_nutrition = getActionNumber(nutritionParams.getBeliefDistribution(),policyVector_nutrition);
-            int actionNumber_exercise = getActionNumber(exerciseParams.getBeliefDistribution(),policyVector_exercise);
-            System.out.println("Selected IntensityLevel Nutrition " + actionNumber_nutrition + 
-                               " Exercise " + actionNumber_exercise);
-            MDPWellness mdpWellness = new MDPWellness(actionNumber_nutrition, actionNumber_exercise);
-            String selectedAction = mdpWellness.getAction((int)UserInfo.currentWeight);
-            actionWindow.setActionSelected(selectedAction);
-            System.out.println(selectedAction);
-            
-            double nutritionCalories = Double.valueOf(selectedAction.split("-")[0]);
-            double exerciseCalories  = Double.valueOf(selectedAction.split("-")[1]);
-            
-            
-            int[] performanceEvaluation = getPerformance();
-            
-            int observationNumber_nutrition = performanceEvaluation[0];
-            int observationNumber_exercise = performanceEvaluation[1];
-            
-            nutritionParams.updateDistribution(actionNumber_nutrition, observationNumber_nutrition);
-            exerciseParams.updateDistribution(actionNumber_exercise, observationNumber_exercise);
-            
-            finalWeight = executeAction(nutritionCalories,nutritionParams.beliefDistribution,calorieVariance,exerciseCalories, exerciseParams.beliefDistribution, calorieVariance );
-            System.out.println("Final Weight " + finalWeight);
-            UserInfo.currentWeight = finalWeight;
-            UserInfo.age += WellnessAction.timeStep/365.0;
-            
-            printBeliefDistribution();
-             
-            nutritionDistributionWindow.update(nutritionParams.getBeliefDistribution());
+//        nutritionDistributionWindow = new DistributionWindow("Nutrition Distribution",nutritionParams.getBeliefDistribution());
+//        exerciseDistributionWindow  = new DistributionWindow("Exercise Distribution", exerciseParams.getBeliefDistribution());
+        String path = "./pomdpEvaluations/"+desireToPerform_nutrition+"-"+desireToPerform_exercise ;
+        new File(path).mkdirs();
+        int trailNumber = 1;
+        for(;trailNumber <= 20;)
+        {
+            int time = 0;
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path+"/trail"+trailNumber+".dat"));
+            writer.write("Nutrition\tExercise\tWeight\n");
+            writer.write("-\t-\t"+UserInfo.currentWeight+"\n" );
+            double finalWeight = UserInfo.currentWeight;
+            while(finalWeight > UserInfo.targetWeight) {
+                int actionNumber_nutrition = getActionNumber(nutritionParams.getBeliefDistribution(),policyVector_nutrition);
+                int actionNumber_exercise = getActionNumber(exerciseParams.getBeliefDistribution(),policyVector_exercise);
+                System.out.println("Selected IntensityLevel Nutrition " + actionNumber_nutrition + 
+                                   " Exercise " + actionNumber_exercise);
+
+                MDPWellness mdpWellness = new MDPWellness(actionNumber_nutrition, actionNumber_exercise);
+                String selectedAction = mdpWellness.getAction((int)UserInfo.currentWeight);
+    //            actionWindow.setActionSelected(selectedAction);
+                System.out.println(selectedAction);
+
+                double nutritionCalories = Double.valueOf(selectedAction.split("-")[0]);
+                double exerciseCalories  = Double.valueOf(selectedAction.split("-")[1]);
+
+
+                int[] performanceEvaluation = getPerformance();
+
+                int observationNumber_nutrition = performanceEvaluation[0];
+                int observationNumber_exercise = performanceEvaluation[1];
+
+                nutritionParams.updateDistribution(actionNumber_nutrition, observationNumber_nutrition);
+                exerciseParams.updateDistribution(actionNumber_exercise, observationNumber_exercise);
+
+                finalWeight = executeAction(nutritionCalories,nutritionParams.beliefDistribution,nutritionVariance,exerciseCalories, exerciseParams.beliefDistribution, exerciseVariance );
+                System.out.println("Final Weight " + finalWeight);
+                UserInfo.currentWeight = finalWeight;
+                UserInfo.age += WellnessAction.timeStep/365.0;
+                time = time + WellnessAction.timeStep;
+                
+                writer.write(nutritionCalories+"\t"+exerciseCalories+"\t"+finalWeight+"\n");
+                printBeliefDistribution();
+                
+                if(time >= 2000) {
+                    break;
+                }
+                
+            }
+            if(UserInfo.currentWeight <= UserInfo.targetWeight ) {
+                trailNumber++;
+            }
+            writer.close();
+            UserInfo.restoreDefaultValues();
+//            nutritionDistributionWindow.update(nutritionParams.getBeliefDistribution());
 //            exerciseDistributionWindow.update(exerciseParams.getBeliefDistribution());
         }
-        System.out.println("Reached Target Weight");
-        for(double d: weightTrajectory) {
-            System.out.println(d);
-        }
+        
+        
+        
     }
-    
     
     double executeAction(double nutritionCalories, double[] nutritionBelief, double[] nutritionVariance, 
                         double exerciseCalories,   double[] exerciseBelief,  double[] exerciseVariance) 
@@ -229,30 +253,29 @@ public class PomdpPolicyEvaluator {
     
     int[] getPerformance() {
         int performance[] = new int[2];
-//         double desireToPerform_nutrition = 0.8;
-//        double desireToPerform_exercise  = 0.8;
-//        
-//        double random = generator.nextDouble();
-//        if(random < desireToPerform_nutrition ) {
-//            performance[0] = 0;
-//        }
-//        else {
-//            performance[0] = 1;
-//        }
-//        random = generator.nextDouble();
-//        if(random < desireToPerform_exercise ) {
-//            performance[1] = 0;
-//        }
-//        else {
-//            performance[1] = 1;
-//        }
-//        
+         
+        
+        double random = generator.nextDouble();
+        if(random < desireToPerform_nutrition ) {
+            performance[0] = 0;
+        }
+        else {
+            performance[0] = 1;
+        }
+        random = generator.nextDouble();
+        if(random < desireToPerform_exercise ) {
+            performance[1] = 0;
+        }
+        else {
+            performance[1] = 1;
+        }
+        
 //        System.out.println("Observation Nutrition:" + performance[0] + " Exercise "+performance[1]);
-        Scanner in = new Scanner(System.in);
-       
-        performance[0] = in.nextInt();
-        performance[1] = in.nextInt();
-       
+//        Scanner in = new Scanner(System.in);
+//       
+//        performance[0] = in.nextInt();
+//        performance[1] = in.nextInt();
+//       
         
         return performance;
     }

@@ -16,7 +16,7 @@ public class ActionSet {
     Domain domain;
     
     static double minCalories = 500;
-    static double maxCalories = 4000;
+    static double maxCalories = 5000;
     
     static double minPA = 1;
     static double maxPA = 3;
@@ -38,10 +38,10 @@ public class ActionSet {
         double calorieLimits[] = getCalorieBounds(this.nutritionMotivationLevel);
         double paLimits[]      = getPABounds(this.exerciseMotivationLevel);
         
-        for(double calories = calorieLimits[0] ; calories <= calorieLimits[1] ; calories += 100)
+        for(double calories = calorieLimits[0] ; calories <= calorieLimits[1] ; calories += 250)
         {
 //            double pa = BodyParams.initialPA;
-            for(double pa = paLimits[0] ; pa <= paLimits[1] ; pa += 0.5 )
+            for(double pa = paLimits[0] ; pa <= paLimits[1] ; pa += 0.1 )
             {
                 new WellnessAction((int)calories+"-"+pa,calories, pa,this.domain, this.stateSpace);
             }
@@ -54,9 +54,9 @@ public class ActionSet {
     static public double[] getCalorieBounds(int motivationLevel) {
         switch(motivationLevel) {
             case 0:
-                return new double[]{2600,maxCalories};
+                return new double[]{2900,maxCalories};
             case 1:
-                return new double[]{1500,2500};
+                return new double[]{1500,2800};
             case 2:
                 return new double[]{minCalories,1400};
             default:
@@ -73,7 +73,7 @@ public class ActionSet {
             case 1:
                 return new double[]{1.5,2.0};
             case 2:
-                return new double[]{2.0,maxPA};
+                return new double[]{2.1,maxPA};
             default:
                 break;
         }
